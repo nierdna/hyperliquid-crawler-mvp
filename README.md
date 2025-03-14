@@ -1,28 +1,28 @@
 # Hyperliquid Event Crawl System - MVP
 
-Hệ thống thu thập và xử lý sự kiện từ Hyperliquid API.
+Event collection and processing system from Hyperliquid API.
 
-## Kiến trúc hệ thống
+## System Architecture
 
-Hệ thống được chia thành các lớp chính:
+The system is divided into main layers:
 
-1. **Data Ingestion Layer**: Thu thập dữ liệu thô từ Hyperliquid API
-   - Crawler Service: Kết nối với API và thu thập sự kiện
-   - Message Queue 1: Lưu trữ tạm thời các sự kiện thô
+1. **Data Ingestion Layer**: Collect raw data from Hyperliquid API
+   - Crawler Service: Connect to API and collect events
+   - Message Queue 1: Temporary storage for raw events
 
-2. **Data Processing Layer**: Xử lý và làm giàu dữ liệu
-   - Data Filter Service: Lọc và làm sạch dữ liệu thô
-   - Message Queue 2: Lưu trữ tạm thời các sự kiện đã lọc
-   - Data Enricher Service: Làm giàu dữ liệu với thông tin bổ sung
+2. **Data Processing Layer**: Process and enrich data
+   - Data Filter Service: Filter and clean raw data
+   - Message Queue 2: Temporary storage for filtered events
+   - Data Enricher Service: Enrich data with additional information
 
-3. **Data Storage Layer**: Lưu trữ dữ liệu đã xử lý
-   - Event Database: Cơ sở dữ liệu lưu trữ sự kiện
+3. **Data Storage Layer**: Store processed data
+   - Event Database: Database for storing events
 
-4. **Monitoring & Management**: Giám sát hệ thống
-   - Metrics Collector: Thu thập các chỉ số hiệu suất
-   - Alert Manager: Quản lý cảnh báo
+4. **Monitoring & Management**: System monitoring
+   - Metrics Collector: Collect performance metrics
+   - Alert Manager: Manage alerts
 
-## Cài đặt
+## Installation
 
 1. Clone repository:
 ```
@@ -30,37 +30,37 @@ git clone https://github.com/yourusername/hyperliquid-crawler-mvp.git
 cd hyperliquid-crawler-mvp
 ```
 
-2. Cài đặt dependencies:
+2. Install dependencies:
 ```
 npm install
 ```
 
-3. Tạo file .env từ .env.example:
+3. Create .env file from .env.example:
 ```
 cp .env.example .env
 ```
 
-4. Cấu hình các biến môi trường trong file .env
+4. Configure environment variables in .env file
 
-## Chạy ứng dụng
+## Running the application
 
-### Chế độ phát triển:
+### Development mode:
 ```
 npm run dev
 ```
 
-### Build và chạy:
+### Build and run:
 ```
 npm run build
 npm start
 ```
 
-## Yêu cầu hệ thống
+## System Requirements
 
 - Node.js 16+
 - MongoDB
 - RabbitMQ
 
-## Giấy phép
+## License
 
 MIT 

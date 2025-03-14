@@ -1,4 +1,4 @@
-// Định nghĩa các types cho sự kiện Hyperliquid
+// Definition of types for Hyperliquid events
 
 export interface HyperliquidRawEvent {
   type: string;
@@ -17,13 +17,13 @@ export interface EnrichedEvent extends FilteredEvent {
   additionalData?: any;
 }
 
-// Định nghĩa types cho message queue
+// Definition of types for message queue
 export interface QueueMessage {
   content: string;
   messageId: string;
 }
 
-// Định nghĩa types cho metrics
+// Definition of types for metrics
 export interface ServiceMetrics {
   serviceName: string;
   timestamp: number;
@@ -32,11 +32,11 @@ export interface ServiceMetrics {
   };
 }
 
-// Định nghĩa types cho alerts
+// Definition of types for alerts
 export interface Alert {
   serviceName: string;
   timestamp: number;
-  level: 'info' | 'warning' | 'error' | 'critical';
+  level: "info" | "warning" | "error" | "critical";
   message: string;
   data?: any;
-} 
+}

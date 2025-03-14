@@ -19,7 +19,7 @@ const EventSchema: Schema = new Schema(
   }
 );
 
-// Tạo index cho tìm kiếm hiệu quả
+// Create index for efficient searching
 EventSchema.index({ type: 1, timestamp: 1 });
 EventSchema.index({ source: 1, timestamp: 1 });
 

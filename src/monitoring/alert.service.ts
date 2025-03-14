@@ -4,69 +4,69 @@ import { Alert } from '../types';
 
 export class AlertService {
   private alerts: Alert[] = [];
-  private maxAlerts = 100; // Giới hạn số lượng cảnh báo lưu trữ
+  private maxAlerts = 100; // Maximum number of alerts to store
 
   constructor() {}
 
-  // Thêm cảnh báo mới
+  // Add new alert
   addAlert(alert: Alert): void {
-    // Thêm cảnh báo vào đầu mảng
+    // Add alert to the beginning of the array
     this.alerts.unshift(alert);
-    
-    // Giới hạn số lượng cảnh báo
+
+    // Limit the number of alerts
     if (this.alerts.length > this.maxAlerts) {
       this.alerts = this.alerts.slice(0, this.maxAlerts);
     }
-    
-    // Ghi log cảnh báo
+
+    // Log the alert
     this.logAlert(alert);
   }
 
-  // Lấy tất cả cảnh báo
+  // Get all alerts
   getAlerts(): Alert[] {
     return this.alerts;
   }
 
-  // Lấy cảnh báo theo mức độ
-  getAlertsByLevel(level: Alert['level']): Alert[] {
+  // Get alerts by level
+  getAlertsByLevel(level: Alert["level"]): Alert[] {
     return this.alerts.filter((alert) => alert.level === level);
   }
 
-  // Lấy cảnh báo theo service
+  // Get alerts by service
   getAlertsByService(serviceName: string): Alert[] {
     return this.alerts.filter((alert) => alert.serviceName === serviceName);
   }
 
-  // Xóa tất cả cảnh báo
+  // Clear all alerts
   clearAlerts(): void {
     this.alerts = [];
-    logger.info('All alerts cleared');
+    logger.info("All alerts cleared");
   }
 
-  // Ghi log cảnh báo
+  // Log alert
   private logAlert(alert: Alert): void {
     const { level, serviceName, message, data } = alert;
-    
+
     switch (level) {
-      case 'info':
+      case "info":
         logger.info({ alert }, `[${serviceName}] ${message}`);
         break;
-      case 'warning':
+      case "warning":
         logger.warn({ alert }, `[${serviceName}] ${message}`);
         break;
-      case 'error':
+      case "error":
         logger.error({ alert }, `[${serviceName}] ${message}`);
         break;
-      case 'critical':
+      case "critical":
         logger.fatal({ alert }, `[${serviceName}] ${message}`);
         break;
     }
   }
 
-  // Tạo cảnh báo mới
+  // Create new alert
   createAlert(
     serviceName: string,
-    level: Alert['level'],
+    level: Alert["level"],
     message: string,
     data?: any
   ): Alert {
@@ -77,7 +77,7 @@ export class AlertService {
       message,
       data,
     };
-    
+
     this.addAlert(alert);
     return alert;
   }

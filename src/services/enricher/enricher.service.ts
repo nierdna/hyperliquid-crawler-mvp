@@ -19,14 +19,16 @@ export class EnricherService {
 
   async start(): Promise<void> {
     try {
-      // Kết nối đến queue
+      // Connect to queue
       await this.filteredQueueService.connect();
-      
-      // Bắt đầu xử lý messages
+
+      // Start processing messages
       this.isRunning = true;
-      await this.filteredQueueService.consumeMessages(this.processMessage.bind(this));
-      
-      logger.info('Enricher service started');
+      await this.filteredQueueService.consumeMessages(
+        this.processMessage.bind(this)
+      );
+
+      logger.info("Enricher service started");
     } catch (error) {
       logger.error({ error }, 'Failed to start enricher service');
       throw error;
@@ -39,42 +41,42 @@ export class EnricherService {
     }
 
     try {
-      logger.debug({ message }, 'Processing filtered event');
-      
-      // Làm giàu dữ liệu
+      logger.debug({ message }, "Processing filtered event");
+
+      // Enrich data
       const enrichedEvent = await this.enrichEvent(message);
-      
-      // Lưu vào database
+
+      // Save to database
       await this.saveToDatabase(enrichedEvent);
-      
-      logger.debug({ enrichedEvent }, 'Saved enriched event to database');
+
+      logger.debug({ enrichedEvent }, "Saved enriched event to database");
     } catch (error) {
       logger.error({ error, message }, 'Error processing message');
     }
   }
 
   private async enrichEvent(event: FilteredEvent): Promise<EnrichedEvent> {
-    // Tạo enriched event cơ bản
+    // Create basic enriched event
     const enrichedEvent: EnrichedEvent = {
       ...event,
       enrichedAt: Date.now(),
     };
 
     try {
-      // Thêm dữ liệu bổ sung dựa trên loại sự kiện
+      // Add additional data based on event type
       switch (event.type) {
-        case 'trade':
+        case "trade":
           enrichedEvent.additionalData = await this.enrichTradeEvent(event);
           break;
-        case 'orderbook':
+        case "orderbook":
           enrichedEvent.additionalData = await this.enrichOrderbookEvent(event);
           break;
-        case 'funding':
+        case "funding":
           enrichedEvent.additionalData = await this.enrichFundingEvent(event);
           break;
       }
     } catch (error) {
-      logger.error({ error, event }, 'Error enriching event');
+      logger.error({ error, event }, "Error enriching event");
     }
 
     return enrichedEvent;
@@ -82,12 +84,12 @@ export class EnricherService {
 
   private async enrichTradeEvent(event: FilteredEvent): Promise<any> {
     try {
-      // Lấy thông tin bổ sung về asset từ API
+      // Get additional information about asset from API
       const assetInfo = await this.fetchAssetInfo(event.data.asset);
-      
-      // Tính toán giá trị USD của giao dịch
+
+      // Calculate USD value of the trade
       const usdValue = event.data.price * event.data.size;
-      
+
       return {
         assetInfo,
         usdValue,
@@ -101,17 +103,22 @@ export class EnricherService {
 
   private async enrichOrderbookEvent(event: FilteredEvent): Promise<any> {
     try {
-      // Tính toán các chỉ số orderbook
+      // Calculate orderbook metrics
       const bids = event.data.bids || [];
       const asks = event.data.asks || [];
-      
-      const bidVolume = bids.reduce((sum: number, [_, size]: [number, number]) => sum + size, 0);
-      const askVolume = asks.reduce((sum: number, [_, size]: [number, number]) => sum + size, 0);
-      
-      const spread = asks.length > 0 && bids.length > 0 
-        ? asks[0][0] - bids[0][0] 
-        : 0;
-      
+
+      const bidVolume = bids.reduce(
+        (sum: number, [_, size]: [number, number]) => sum + size,
+        0
+      );
+      const askVolume = asks.reduce(
+        (sum: number, [_, size]: [number, number]) => sum + size,
+        0
+      );
+
+      const spread =
+        asks.length > 0 && bids.length > 0 ? asks[0][0] - bids[0][0] : 0;
+
       return {
         bidVolume,
         askVolume,
@@ -126,14 +133,14 @@ export class EnricherService {
 
   private async enrichFundingEvent(event: FilteredEvent): Promise<any> {
     try {
-      // Lấy thông tin lịch sử funding
+      // Get funding history information
       const fundingHistory = await this.fetchFundingHistory(event.data.asset);
-      
-      // Tính toán các chỉ số funding
-      const averageFundingRate = fundingHistory.reduce(
-        (sum: number, rate: number) => sum + rate, 0
-      ) / (fundingHistory.length || 1);
-      
+
+      // Calculate funding metrics
+      const averageFundingRate =
+        fundingHistory.reduce((sum: number, rate: number) => sum + rate, 0) /
+        (fundingHistory.length || 1);
+
       return {
         fundingHistory,
         averageFundingRate,
@@ -187,11 +194,11 @@ export class EnricherService {
   async stop(): Promise<void> {
     try {
       this.isRunning = false;
-      
-      // Đóng kết nối đến queue
+
+      // Close connection to queue
       await this.filteredQueueService.close();
-      
-      logger.info('Enricher service stopped');
+
+      logger.info("Enricher service stopped");
     } catch (error) {
       logger.error({ error }, 'Error stopping enricher service');
     }

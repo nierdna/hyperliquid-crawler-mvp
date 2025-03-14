@@ -13,13 +13,13 @@ export class MetricsService {
   }
 
   private setupRoutes(): void {
-    // Endpoint để lấy metrics
-    this.app.get('/metrics', (req, res) => {
+    // Endpoint to get metrics
+    this.app.get("/metrics", (req, res) => {
       res.json(this.metrics);
     });
 
-    // Endpoint để lấy metrics của một service cụ thể
-    this.app.get('/metrics/:service', (req, res) => {
+    // Endpoint to get metrics for a specific service
+    this.app.get("/metrics/:service", (req, res) => {
       const serviceName = req.params.service;
       if (this.metrics[serviceName]) {
         res.json(this.metrics[serviceName]);
@@ -28,8 +28,8 @@ export class MetricsService {
       }
     });
 
-    // Endpoint để cập nhật metrics
-    this.app.post('/metrics/:service', express.json(), (req, res) => {
+    // Endpoint to update metrics
+    this.app.post("/metrics/:service", express.json(), (req, res) => {
       const serviceName = req.params.service;
       const serviceMetrics: ServiceMetrics = {
         serviceName,
@@ -43,15 +43,17 @@ export class MetricsService {
     });
 
     // Health check endpoint
-    this.app.get('/health', (req, res) => {
-      res.json({ status: 'ok' });
+    this.app.get("/health", (req, res) => {
+      res.json({ status: "ok" });
     });
   }
 
   async start(): Promise<void> {
     return new Promise((resolve) => {
       this.server = this.app.listen(config.services.metrics.port, () => {
-        logger.info(`Metrics service started on port ${config.services.metrics.port}`);
+        logger.info(
+          `Metrics service started on port ${config.services.metrics.port}`
+        );
         resolve();
       });
     });
@@ -62,10 +64,10 @@ export class MetricsService {
       if (this.server) {
         this.server.close((err: Error) => {
           if (err) {
-            logger.error({ error: err }, 'Error stopping metrics service');
+            logger.error({ error: err }, "Error stopping metrics service");
             reject(err);
           } else {
-            logger.info('Metrics service stopped');
+            logger.info("Metrics service stopped");
             resolve();
           }
         });
@@ -75,13 +77,13 @@ export class MetricsService {
     });
   }
 
-  // Phương thức để các service khác cập nhật metrics
+  // Method for other services to update metrics
   updateMetrics(serviceName: string, metrics: Record<string, number>): void {
     this.metrics[serviceName] = {
       serviceName,
       timestamp: Date.now(),
       metrics,
     };
-    logger.debug({ serviceName, metrics }, 'Updated metrics');
+    logger.debug({ serviceName, metrics }, "Updated metrics");
   }
 } 

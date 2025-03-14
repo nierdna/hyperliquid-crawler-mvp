@@ -19,13 +19,13 @@ export class CrawlerService {
 
   async start(): Promise<void> {
     try {
-      // Kết nối đến RabbitMQ
+      // Connect to RabbitMQ
       await this.queueService.connect();
-      
-      // Kết nối đến Hyperliquid WebSocket API
+
+      // Connect to Hyperliquid WebSocket API
       this.connectToWebSocket();
-      
-      logger.info('Crawler service started');
+
+      logger.info("Crawler service started");
     } catch (error) {
       logger.error({ error }, 'Failed to start crawler service');
       throw error;
@@ -86,19 +86,19 @@ export class CrawlerService {
   private async handleMessage(data: WebSocket.Data): Promise<void> {
     try {
       const message = JSON.parse(data.toString());
-      
-      // Kiểm tra nếu là message sự kiện (không phải message xác nhận đăng ký)
+
+      // Check if it's an event message (not a subscription confirmation message)
       if (message.type && message.data) {
         const event: HyperliquidRawEvent = {
           type: message.type,
           timestamp: Date.now(),
           data: message.data,
-          source: 'hyperliquid-ws',
+          source: "hyperliquid-ws",
         };
 
-        // Gửi sự kiện vào queue
+        // Send event to queue
         await this.queueService.publishMessage(event);
-        logger.debug({ event }, 'Published event to raw queue');
+        logger.debug({ event }, "Published event to raw queue");
       }
     } catch (error) {
       logger.error({ error, data }, 'Error handling WebSocket message');

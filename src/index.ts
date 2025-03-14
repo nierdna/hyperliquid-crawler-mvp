@@ -6,121 +6,112 @@ import { EnricherService } from './services/enricher/enricher.service';
 import { MetricsService } from './monitoring/metrics.service';
 import { AlertService } from './monitoring/alert.service';
 
-// Khởi tạo các services
+// Initialize services
 const crawlerService = new CrawlerService();
 const filterService = new FilterService();
 const enricherService = new EnricherService();
 const metricsService = new MetricsService();
 const alertService = new AlertService();
 
-// Hàm khởi động hệ thống
+// System startup function
 async function startSystem() {
   try {
-    logger.info('Starting Hyperliquid Event Crawl System...');
+    logger.info("Starting Hyperliquid Event Crawl System...");
 
-    // Kết nối đến database
+    // Connect to database
     await connectToDatabase();
 
-    // Khởi động các services
+    // Start services
     await metricsService.start();
     await crawlerService.start();
     await filterService.start();
     await enricherService.start();
 
-    // Tạo cảnh báo thông báo hệ thống đã khởi động
+    // Create alert to notify system has started
     alertService.createAlert(
-      'system',
-      'info',
-      'Hyperliquid Event Crawl System started successfully',
+      "system",
+      "info",
+      "Hyperliquid Event Crawl System started successfully",
       { timestamp: Date.now() }
     );
 
-    logger.info('All services started successfully');
+    logger.info("All services started successfully");
 
-    // Xử lý tắt hệ thống khi nhận tín hiệu
+    // Handle system shutdown when receiving signals
     setupShutdownHandlers();
   } catch (error) {
-    logger.error({ error }, 'Failed to start system');
-    
-    // Tạo cảnh báo lỗi
-    alertService.createAlert(
-      'system',
-      'critical',
-      'Failed to start system',
-      { error }
-    );
-    
-    // Tắt hệ thống nếu khởi động thất bại
+    logger.error({ error }, "Failed to start system");
+
+    // Create error alert
+    alertService.createAlert("system", "critical", "Failed to start system", {
+      error,
+    });
+
+    // Shutdown system if startup fails
     await stopSystem();
     process.exit(1);
   }
 }
 
-// Hàm tắt hệ thống
+// System shutdown function
 async function stopSystem() {
   logger.info('Stopping Hyperliquid Event Crawl System...');
 
   try {
-    // Tắt các services theo thứ tự ngược lại
+    // Stop services in reverse order
     await enricherService.stop();
     await filterService.stop();
     await crawlerService.stop();
     await metricsService.stop();
 
-    // Ngắt kết nối database
+    // Disconnect from database
     await disconnectFromDatabase();
 
-    logger.info('All services stopped successfully');
+    logger.info("All services stopped successfully");
   } catch (error) {
     logger.error({ error }, 'Error stopping system');
   }
 }
 
-// Thiết lập xử lý tắt hệ thống
+// Setup system shutdown handlers
 function setupShutdownHandlers() {
-  // Xử lý tín hiệu SIGINT (Ctrl+C)
-  process.on('SIGINT', async () => {
-    logger.info('Received SIGINT signal');
+  // Handle SIGINT signal (Ctrl+C)
+  process.on("SIGINT", async () => {
+    logger.info("Received SIGINT signal");
     await stopSystem();
     process.exit(0);
   });
 
-  // Xử lý tín hiệu SIGTERM
-  process.on('SIGTERM', async () => {
-    logger.info('Received SIGTERM signal');
+  // Handle SIGTERM signal
+  process.on("SIGTERM", async () => {
+    logger.info("Received SIGTERM signal");
     await stopSystem();
     process.exit(0);
   });
 
-  // Xử lý lỗi không bắt được
-  process.on('uncaughtException', async (error) => {
-    logger.error({ error }, 'Uncaught exception');
-    
-    // Tạo cảnh báo lỗi
-    alertService.createAlert(
-      'system',
-      'critical',
-      'Uncaught exception',
-      { error }
-    );
-    
+  // Handle uncaught exceptions
+  process.on("uncaughtException", async (error) => {
+    logger.error({ error }, "Uncaught exception");
+
+    // Create error alert
+    alertService.createAlert("system", "critical", "Uncaught exception", {
+      error,
+    });
+
     await stopSystem();
     process.exit(1);
   });
 
-  // Xử lý promise bị reject không bắt được
-  process.on('unhandledRejection', async (reason) => {
-    logger.error({ reason }, 'Unhandled rejection');
-    
-    // Tạo cảnh báo lỗi
-    alertService.createAlert(
-      'system',
-      'critical',
-      'Unhandled rejection',
-      { reason }
-    );
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", async (reason) => {
+    logger.error({ reason }, "Unhandled rejection");
+
+    // Create error alert
+    alertService.createAlert("system", "critical", "Unhandled rejection", {
+      reason,
+    });
   });
 }
 
-// Khởi động hệ thống
+// Start the system
 startSystem(); 
