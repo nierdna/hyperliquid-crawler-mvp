@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      - HYPERLIQUID_API_URL=wss://api.hyperliquid.xyz/ws
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_URI=mongodb://mongodb:27017/hyperliquid-events
+      - LOG_LEVEL=info
+      - API_PORT=3000
+      - METRICS_PORT=9090
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  rabbitmq_data: 
