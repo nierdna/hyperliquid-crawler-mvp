@@ -1,0 +1,53 @@
+Table users {
+  address string [primary key]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table sub_accounts {
+  id uuid [primary key]
+  master_address string [not null, ref: > users.address]
+  sub_account_address string [unique, not null]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table trades {
+  tid bigint [primary key]
+  coin string [not null]
+  side string [not null, note: 'A for Ask, B for Bid']
+  px decimal [not null, note: 'Price']
+  sz decimal [not null, note: 'Size']
+  time bigint [not null, note: 'Timestamp in milliseconds']
+  hash string [not null, note: 'Transaction hash']
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table trade_participants {
+  id uuid [primary key]
+  trade_id bigint [not null, ref: > trades.tid]
+  user_address string [not null, ref: > users.address]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table orders {
+  oid bigint [primary key]
+  user_address string [not null, ref: > users.address]
+  coin string [not null]
+  px decimal [not null, note: 'Price']
+  sz decimal [not null, note: 'Size']
+  side string [not null, note: 'A for Ask, B for Bid']
+  time bigint [not null, note: 'Timestamp in milliseconds']
+  start_position decimal [note: 'Starting position']
+  dir string [note: 'Direction e.g. Close Long']
+  closed_pnl decimal [note: 'Closed profit and loss']
+  hash string [not null, note: 'Transaction hash']
+  crossed boolean [note: 'Whether the order is crossed']
+  fee decimal [note: 'Fee amount']
+  fee_token string [note: 'Token used for fee']
+  trade_id bigint [ref: > trades.tid]
+  created_at timestamptz
+  updated_at timestamptz
+} 
