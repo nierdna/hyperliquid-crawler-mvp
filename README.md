@@ -16,7 +16,7 @@ The system is divided into main layers:
    - Data Enricher Service: Enrich data with additional information
 
 3. **Data Storage Layer**: Store processed data
-   - Event Database: Database for storing events
+   - Event Database: PostgreSQL database for storing events
 
 4. **Monitoring & Management**: System monitoring
    - Metrics Collector: Collect performance metrics
@@ -55,10 +55,27 @@ npm run build
 npm start
 ```
 
+### Running with Docker Compose:
+```
+docker-compose up -d
+```
+
+## Database Migrations
+
+To run migrations:
+```
+npm run typeorm migration:run
+```
+
+To create a new migration:
+```
+npm run typeorm migration:create src/migrations/YourMigrationName
+```
+
 ## System Requirements
 
 - Node.js 16+
-- MongoDB
+- PostgreSQL 12+
 - RabbitMQ
 
 ## License

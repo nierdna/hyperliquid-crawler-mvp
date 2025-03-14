@@ -7,23 +7,31 @@ services:
       - "3000:3000"
       - "9090:9090"
     depends_on:
-      - mongodb
+      - postgres
       - rabbitmq
     environment:
       - HYPERLIQUID_API_URL=wss://api.hyperliquid.xyz/ws
       - RABBITMQ_URL=amqp://rabbitmq:5672
-      - MONGODB_URI=mongodb://mongodb:27017/hyperliquid-events
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=hyperliquid_events
       - LOG_LEVEL=info
       - API_PORT=3000
       - METRICS_PORT=9090
     restart: unless-stopped
 
-  mongodb:
-    image: mongo:6
+  postgres:
+    image: postgres:15
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongodb_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=hyperliquid_events
     restart: unless-stopped
 
   rabbitmq:
@@ -36,5 +44,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb_data:
+  postgres_data:
   rabbitmq_data: 

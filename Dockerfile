@@ -2,7 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Cài đặt dependencies
+# Install PostgreSQL client
+RUN apk add --no-cache postgresql-client
+
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 

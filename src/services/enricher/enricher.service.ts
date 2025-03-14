@@ -3,15 +3,17 @@ import config from '../../config';
 import logger from '../../utils/logger';
 import { QueueService } from '../../queues/queue.service';
 import { EnrichedEvent, FilteredEvent } from '../../types';
-import EventModel from '../../models/event.model';
+import Event from "../../models/event.model";
+import { AppDataSource } from "../../config/database";
 
 export class EnricherService {
   private filteredQueueService: QueueService;
   private isRunning = false;
   private apiClient = axios.create({
-    baseURL: 'https://api.hyperliquid.xyz',
+    baseURL: "https://api.hyperliquid.xyz",
     timeout: 5000,
   });
+  private eventRepository = AppDataSource.getRepository(Event);
 
   constructor() {
     this.filteredQueueService = new QueueService(config.rabbitmq.filteredQueue);
@@ -30,7 +32,7 @@ export class EnricherService {
 
       logger.info("Enricher service started");
     } catch (error) {
-      logger.error({ error }, 'Failed to start enricher service');
+      logger.error({ error }, "Failed to start enricher service");
       throw error;
     }
   }
@@ -51,7 +53,7 @@ export class EnricherService {
 
       logger.debug({ enrichedEvent }, "Saved enriched event to database");
     } catch (error) {
-      logger.error({ error, message }, 'Error processing message');
+      logger.error({ error, message }, "Error processing message");
     }
   }
 
@@ -96,7 +98,7 @@ export class EnricherService {
         marketConditions: await this.fetchMarketConditions(event.data.asset),
       };
     } catch (error) {
-      logger.error({ error, event }, 'Error enriching trade event');
+      logger.error({ error, event }, "Error enriching trade event");
       return {};
     }
   }
@@ -126,7 +128,7 @@ export class EnricherService {
         bidAskRatio: bidVolume / (askVolume || 1),
       };
     } catch (error) {
-      logger.error({ error, event }, 'Error enriching orderbook event');
+      logger.error({ error, event }, "Error enriching orderbook event");
       return {};
     }
   }
@@ -147,7 +149,7 @@ export class EnricherService {
         annualizedRate: event.data.rate * 24 * 365,
       };
     } catch (error) {
-      logger.error({ error, event }, 'Error enriching funding event');
+      logger.error({ error, event }, "Error enriching funding event");
       return {};
     }
   }
@@ -157,7 +159,7 @@ export class EnricherService {
       const response = await this.apiClient.get(`/info/asset/${asset}`);
       return response.data;
     } catch (error) {
-      logger.error({ error, asset }, 'Error fetching asset info');
+      logger.error({ error, asset }, "Error fetching asset info");
       return {};
     }
   }
@@ -167,7 +169,7 @@ export class EnricherService {
       const response = await this.apiClient.get(`/info/market/${asset}`);
       return response.data;
     } catch (error) {
-      logger.error({ error, asset }, 'Error fetching market conditions');
+      logger.error({ error, asset }, "Error fetching market conditions");
       return {};
     }
   }
@@ -177,16 +179,20 @@ export class EnricherService {
       const response = await this.apiClient.get(`/info/funding/${asset}`);
       return response.data.rates || [];
     } catch (error) {
-      logger.error({ error, asset }, 'Error fetching funding history');
+      logger.error({ error, asset }, "Error fetching funding history");
       return [];
     }
   }
 
   private async saveToDatabase(event: EnrichedEvent): Promise<void> {
     try {
-      await EventModel.create(event);
+      // Create a new Event entity
+      const newEvent = this.eventRepository.create(event);
+
+      // Save to database
+      await this.eventRepository.save(newEvent);
     } catch (error) {
-      logger.error({ error, event }, 'Error saving event to database');
+      logger.error({ error, event }, "Error saving event to database");
       throw error;
     }
   }
@@ -200,7 +206,7 @@ export class EnricherService {
 
       logger.info("Enricher service stopped");
     } catch (error) {
-      logger.error({ error }, 'Error stopping enricher service');
+      logger.error({ error }, "Error stopping enricher service");
     }
   }
 } 

@@ -1,26 +1,51 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { EnrichedEvent } from '../types';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { EnrichedEvent } from "../types";
 
-export interface EventDocument extends EnrichedEvent, Document {}
+@Entity("events")
+@Index(["type", "timestamp"])
+@Index(["source", "timestamp"])
+export class Event implements EnrichedEvent {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-const EventSchema: Schema = new Schema(
-  {
-    type: { type: String, required: true, index: true },
-    timestamp: { type: Number, required: true, index: true },
-    data: { type: Schema.Types.Mixed, required: true },
-    source: { type: String, required: true },
-    filteredAt: { type: Number, required: true },
-    isValid: { type: Boolean, required: true },
-    enrichedAt: { type: Number, required: true },
-    additionalData: { type: Schema.Types.Mixed },
-  },
-  {
-    timestamps: true,
-  }
-);
+  @Column()
+  @Index()
+  type: string;
 
-// Create index for efficient searching
-EventSchema.index({ type: 1, timestamp: 1 });
-EventSchema.index({ source: 1, timestamp: 1 });
+  @Column("bigint")
+  @Index()
+  timestamp: number;
 
-export default mongoose.model<EventDocument>('Event', EventSchema); 
+  @Column("jsonb")
+  data: any;
+
+  @Column()
+  source: string;
+
+  @Column("bigint")
+  filteredAt: number;
+
+  @Column()
+  isValid: boolean;
+
+  @Column("bigint")
+  enrichedAt: number;
+
+  @Column("jsonb", { nullable: true })
+  additionalData?: any;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
+
+export default Event;
